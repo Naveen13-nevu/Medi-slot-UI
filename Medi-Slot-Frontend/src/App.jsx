@@ -6,14 +6,15 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import PatientDashboard from './pages/PatientDashboard';
 import DoctorDashboard from './pages/DoctorDashboard';
+import AdminDashboard from './pages/AdminDashboard';   // new
 import NotFound from './pages/NotFound';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 
 const theme = createTheme({
   palette: {
-    primary: { main: '#2563EB' },   // blue-600
-    secondary: { main: '#10B981' }, // emerald-500
+    primary: { main: '#2563EB' },
+    secondary: { main: '#10B981' },
   },
   typography: {
     fontFamily: '"Inter", "Roboto", "Helvetica", "Arial", sans-serif',
@@ -42,7 +43,7 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route
           path="/login"
-          element={!user ? <Login /> : <Navigate to={user.role === 'PATIENT' ? '/patient' : '/doctor'} />}
+          element={!user ? <Login /> : <Navigate to={user.role === 'PATIENT' ? '/patient' : user.role === 'DOCTOR' ? '/doctor' : '/admin'} />}
         />
         <Route path="/register" element={!user ? <Register /> : <Navigate to="/" />} />
         <Route
@@ -52,6 +53,10 @@ function App() {
         <Route
           path="/doctor"
           element={user?.role === 'DOCTOR' ? <DoctorDashboard /> : <Navigate to="/login" />}
+        />
+        <Route
+          path="/admin"
+          element={user?.role === 'ADMIN' ? <AdminDashboard /> : <Navigate to="/login" />}
         />
         <Route path="*" element={<NotFound />} />
       </Routes>

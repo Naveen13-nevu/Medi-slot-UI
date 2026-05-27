@@ -3,11 +3,12 @@ import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
 import {
-  Box, Grid, Card, CardContent, Typography, Button, Chip, TextField, InputAdornment
+  Box, Grid, Card, CardContent, Typography, Button, Chip, TextField,
+  InputAdornment, IconButton
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import EventAvailableIcon from '@mui/icons-material/EventAvailable';
-import PersonIcon from '@mui/icons-material/Person';
+import CancelIcon from '@mui/icons-material/Cancel';
 
 export default function PatientDashboard() {
   const { user } = useAuth();
@@ -27,7 +28,9 @@ export default function PatientDashboard() {
     try {
       const res = await api.get('/doctors');
       setDoctors(res.data);
-    } catch (err) { toast.error('Could not load doctors'); }
+    } catch (err) {
+      toast.error('Could not load doctors');
+    }
   };
 
   const fetchSlots = async (doctorId) => {
@@ -36,8 +39,11 @@ export default function PatientDashboard() {
       const res = await api.get(`/doctors/${doctorId}/slots`);
       setSlots(res.data);
       setSelectedDoctor(doctorId);
-    } catch (err) { toast.error('Failed to load slots'); }
-    finally { setLoadingSlots(false); }
+    } catch (err) {
+      toast.error('Failed to load slots');
+    } finally {
+      setLoadingSlots(false);
+    }
   };
 
   const bookSlot = async (slotId) => {
@@ -46,14 +52,28 @@ export default function PatientDashboard() {
       toast.success('Appointment confirmed!');
       fetchSlots(selectedDoctor);
       fetchAppointments();
-    } catch (err) { toast.error(err.response?.data?.message || 'Booking failed'); }
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Booking failed');
+    }
   };
 
   const fetchAppointments = async () => {
     try {
       const res = await api.get('/patient/appointments');
       setAppointments(res.data);
-    } catch (err) { toast.error('Failed to load appointments'); }
+    } catch (err) {
+      toast.error('Failed to load appointments');
+    }
+  };
+
+  const cancelAppointment = async (appointmentId) => {
+    try {
+      await api.delete(`/patient/appointments/${appointmentId}`);
+      toast.success('Appointment cancelled');
+      fetchAppointments(); // refresh the list
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Cancellation failed');
+    }
   };
 
   const filteredDoctors = doctors.filter(doc =>
@@ -150,7 +170,7 @@ export default function PatientDashboard() {
         </Grid>
       </Grid>
 
-      {/* Appointments */}
+      {/* My Appointments (with cancel) */}
       <Box sx={{ mt: 6 }}>
         <Typography variant="h5" fontWeight="bold" sx={{ mb: 3 }}>My Appointments</Typography>
         {appointments.length === 0 ? (
@@ -159,7 +179,7 @@ export default function PatientDashboard() {
           <Grid container spacing={2}>
             {appointments.map((app) => (
               <Grid item xs={12} sm={6} md={4} key={app.id}>
-                <Card sx={{ borderLeft: '4px solid #2563EB', boxShadow: 2 }}>
+                <Card sx={{ borderLeft: '4px solid #2563EB', boxShadow: 2, position: 'relative' }}>
                   <CardContent>
                     <Typography variant="h6" fontWeight="bold">{app.doctorName}</Typography>
                     <Typography variant="body2" color="text.secondary">{app.specialization}</Typography>
@@ -169,6 +189,13 @@ export default function PatientDashboard() {
                     <Typography variant="body2">
                       {new Date(app.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} – {new Date(app.endTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </Typography>
+                    <IconButton
+                      color="error"
+                      sx={{ position: 'absolute', top: 8, right: 8 }}
+                      onClick={() => cancelAppointment(app.id)}
+                    >
+                      <CancelIcon />
+                    </IconButton>
                   </CardContent>
                 </Card>
               </Grid>
