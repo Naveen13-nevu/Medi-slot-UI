@@ -4,7 +4,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { Box, Card, TextField, Button, Typography, Alert } from '@mui/material';
 
 export default function Login() {
-  const [form, setForm] = useState({ username: '', password: '' });
+  const [form, setForm] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -13,11 +13,11 @@ export default function Login() {
     e.preventDefault();
     setError('');
     try {
-      await login(form.username, form.password);
+      await login(form.email, form.password);
       const role = localStorage.getItem('role');
-      navigate(role === 'PATIENT' ? '/patient' : '/doctor');
+      navigate(role === 'PATIENT' ? '/patient' : role === 'DOCTOR' ? '/doctor' : '/admin');
     } catch (err) {
-      setError(err.response?.data?.message || 'Invalid username or password');
+      setError(err.response?.data?.message || 'Invalid email or password');
     }
   };
 
@@ -28,27 +28,12 @@ export default function Login() {
           Welcome Back
         </Typography>
         <Typography align="center" color="text.secondary" sx={{ mb: 3 }}>
-          Sign in to your account
+          Sign in with your email
         </Typography>
         {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
         <form onSubmit={handleSubmit}>
-          <TextField
-            label="Username"
-            fullWidth
-            margin="normal"
-            value={form.username}
-            onChange={(e) => setForm({ ...form, username: e.target.value })}
-            required
-          />
-          <TextField
-            label="Password"
-            type="password"
-            fullWidth
-            margin="normal"
-            value={form.password}
-            onChange={(e) => setForm({ ...form, password: e.target.value })}
-            required
-          />
+          <TextField label="Email" type="email" fullWidth margin="normal" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} required />
+          <TextField label="Password" type="password" fullWidth margin="normal" value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} required />
           <Button type="submit" variant="contained" fullWidth size="large" sx={{ mt: 3 }}>
             Login
           </Button>
@@ -56,7 +41,7 @@ export default function Login() {
         <Typography align="center" sx={{ mt: 2 }}>
           Don’t have an account?{' '}
           <Link to="/register" style={{ color: '#2563EB', textDecoration: 'none', fontWeight: 500 }}>
-            Create one
+            Register
           </Link>
         </Typography>
       </Card>

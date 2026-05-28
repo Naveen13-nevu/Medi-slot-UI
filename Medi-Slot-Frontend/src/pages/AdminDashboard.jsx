@@ -11,7 +11,7 @@ export default function AdminDashboard() {
   const [slotForm, setSlotForm] = useState({ startTime: '', endTime: '' });
 
   const [doctorForm, setDoctorForm] = useState({
-    username: '',
+    email: '',
     password: '',
     name: '',
     specialization: '',
@@ -21,7 +21,6 @@ export default function AdminDashboard() {
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
 
-  // Load doctors list on mount
   useEffect(() => {
     fetchDoctors();
   }, []);
@@ -35,7 +34,6 @@ export default function AdminDashboard() {
     }
   };
 
-  // ---------- Create Doctor ----------
   const handleDoctorChange = (e) =>
     setDoctorForm({ ...doctorForm, [e.target.name]: e.target.value });
 
@@ -46,15 +44,14 @@ export default function AdminDashboard() {
     try {
       await api.post('/admin/doctors', doctorForm);
       toast.success('Doctor created');
-      fetchDoctors(); // refresh dropdown list
-      setDoctorForm({ username: '', password: '', name: '', specialization: '', experience: '', phone: '' });
+      fetchDoctors();
+      setDoctorForm({ email: '', password: '', name: '', specialization: '', experience: '', phone: '' });
     } catch (err) {
       setError(err.response?.data?.message || 'Creation failed');
       toast.error('Failed to create doctor');
     }
   };
 
-  // ---------- Add Slot for a Doctor ----------
   const handleSlotChange = (e) =>
     setSlotForm({ ...slotForm, [e.target.name]: e.target.value });
 
@@ -83,10 +80,9 @@ export default function AdminDashboard() {
         Admin Dashboard
       </Typography>
       <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
-        Logged in as <strong>{user?.username}</strong>.
+        Logged in as <strong>{user?.role}</strong>.
       </Typography>
 
-      {/* Create Doctor Card – centered */}
       <Card sx={{ p: 4, maxWidth: 500, width: '100%', mb: 4, boxShadow: 4 }}>
         <Typography variant="h6" fontWeight="bold" sx={{ mb: 3 }}>
           Create a New Doctor
@@ -94,9 +90,9 @@ export default function AdminDashboard() {
         {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
         {message && <Alert severity="success" sx={{ mb: 2 }}>{message}</Alert>}
         <form onSubmit={createDoctor}>
-          <TextField name="username" label="Username" fullWidth margin="normal" value={doctorForm.username} onChange={handleDoctorChange} required />
-          <TextField name="password" label="Password" type="password" fullWidth margin="normal" value={doctorForm.password} onChange={handleDoctorChange} required />
           <TextField name="name" label="Full Name" fullWidth margin="normal" value={doctorForm.name} onChange={handleDoctorChange} required />
+          <TextField name="email" type="email" label="Email" fullWidth margin="normal" value={doctorForm.email} onChange={handleDoctorChange} required />
+          <TextField name="password" type="password" label="Password" fullWidth margin="normal" value={doctorForm.password} onChange={handleDoctorChange} required />
           <TextField name="specialization" label="Specialization" fullWidth margin="normal" value={doctorForm.specialization} onChange={handleDoctorChange} required />
           <TextField name="experience" label="Experience" fullWidth margin="normal" value={doctorForm.experience} onChange={handleDoctorChange} />
           <TextField name="phone" label="Phone" fullWidth margin="normal" value={doctorForm.phone} onChange={handleDoctorChange} />
@@ -106,7 +102,6 @@ export default function AdminDashboard() {
         </form>
       </Card>
 
-      {/* Add Slot for a Doctor Card – centered */}
       <Card sx={{ p: 4, maxWidth: 500, width: '100%', boxShadow: 4 }}>
         <Typography variant="h6" fontWeight="bold" sx={{ mb: 3 }}>
           Add Available Slot for a Doctor
