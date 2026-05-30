@@ -6,7 +6,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import PatientDashboard from './pages/PatientDashboard';
 import DoctorDashboard from './pages/DoctorDashboard';
-import AdminDashboard from './pages/AdminDashboard';   // new
+import AdminDashboard from './pages/AdminDashboard';   
 import NotFound from './pages/NotFound';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
