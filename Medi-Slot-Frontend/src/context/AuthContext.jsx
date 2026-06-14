@@ -11,12 +11,26 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    const role = localStorage.getItem('role');
-    if (token && role) {
-      setUser({ token, role });
-    }
-    setLoading(false);
+    const validateToken = async () => {
+      const token = localStorage.getItem('token');
+      const role = localStorage.getItem('role');
+      if (token && role) {
+        try {
+          const res = await api.get('/auth/validate');
+          // Token is valid – set user
+          setUser({ token, role: res.data.role });
+        } catch (err) {
+          // Token invalid or expired – clear
+          localStorage.removeItem('token');
+          localStorage.removeItem('role');
+          setUser(null);
+        }
+      } else {
+        setUser(null);
+      }
+      setLoading(false);
+    };
+    validateToken();
   }, []);
 
   const login = async (email, password) => {

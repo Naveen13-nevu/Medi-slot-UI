@@ -2,7 +2,21 @@ import { Box, Typography, Card, Button, TextField, Alert, MenuItem } from '@mui/
 import { useState, useEffect } from 'react';
 import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
-import toast from 'react-hot-toast';
+
+// Safe toast import – if it fails, use alert
+let toast;
+try {
+  toast = require('react-hot-toast').default;
+} catch (e) {
+  toast = null;
+}
+const notify = (type, msg) => {
+  if (toast && toast[type]) {
+    toast[type](msg);
+  } else {
+    alert(`${type}: ${msg}`);
+  }
+};
 
 export default function AdminDashboard() {
   const { user } = useAuth();
@@ -28,18 +42,12 @@ export default function AdminDashboard() {
   const fetchDoctors = async () => {
     try {
       const res = await api.get('/doctors?size=100');
-      console.log('Doctors API response:', res.data);   // DEBUG
-      const list = res.data.content || res.data;         // support page or array
-      if (Array.isArray(list)) {
-        console.log('Setting doctors list:', list.length, 'items');
-        setDoctors([...list]);   // new array to trigger re-render
-      } else {
-        console.warn('Unexpected doctors format', list);
-        setDoctors([]);
-      }
+      const list = res.data?.content || res.data || [];
+      setDoctors(Array.isArray(list) ? list : []);
     } catch (err) {
-      console.error('Failed to fetch doctors:', err);
-      toast.error('Could not load doctors');
+      console.error('fetchDoctors failed:', err);
+      notify('error', 'Could not load doctors');
+      setDoctors([]);
     }
   };
 
@@ -52,12 +60,12 @@ export default function AdminDashboard() {
     setMessage('');
     try {
       await api.post('/admin/doctors', doctorForm);
-      toast.success('Doctor created');
-      fetchDoctors();                     // refresh the list
+      notify('success', 'Doctor created');
+      fetchDoctors();
       setDoctorForm({ email: '', password: '', name: '', specialization: '', experience: '', phone: '' });
     } catch (err) {
       setError(err.response?.data?.message || 'Creation failed');
-      toast.error('Failed to create doctor');
+      notify('error', 'Failed to create doctor');
     }
   };
 
@@ -67,21 +75,23 @@ export default function AdminDashboard() {
   const addSlotForDoctor = async (e) => {
     e.preventDefault();
     if (!selectedDoctorId) {
-      toast.error('Please select a doctor');
+      notify('error', 'Please select a doctor');
       return;
     }
     if (new Date(slotForm.endTime) <= new Date(slotForm.startTime)) {
-      toast.error('End time must be after start time');
+      notify('error', 'End time must be after start time');
       return;
     }
     try {
       await api.post(`/admin/doctors/${selectedDoctorId}/slots`, slotForm);
-      toast.success('Slot added for doctor');
+      notify('success', 'Slot added for doctor');
       setSlotForm({ startTime: '', endTime: '' });
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to add slot');
+      notify('error', err.response?.data?.message || 'Failed to add slot');
     }
   };
+
+  const doctorOptions = Array.isArray(doctors) ? doctors : [];
 
   return (
     <Box sx={{ p: 4, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
@@ -92,7 +102,6 @@ export default function AdminDashboard() {
         Logged in as <strong>{user?.role || 'Admin'}</strong>
       </Typography>
 
-      {/* Create Doctor Card */}
       <Card sx={{ p: 4, maxWidth: 500, width: '100%', mb: 4, boxShadow: 4 }}>
         <Typography variant="h6" fontWeight="bold" sx={{ mb: 3 }}>
           Create a New Doctor
@@ -112,16 +121,10 @@ export default function AdminDashboard() {
         </form>
       </Card>
 
-      {/* Add Slot Card */}
       <Card sx={{ p: 4, maxWidth: 500, width: '100%', boxShadow: 4 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-          <Typography variant="h6" fontWeight="bold">
-            Add Available Slot for a Doctor
-          </Typography>
-          <Button size="small" variant="outlined" onClick={fetchDoctors}>
-            Refresh Doctors
-          </Button>
-        </Box>
+        <Typography variant="h6" fontWeight="bold" sx={{ mb: 3 }}>
+          Add Available Slot for a Doctor
+        </Typography>
         <TextField
           select
           label="Select Doctor"
@@ -131,10 +134,10 @@ export default function AdminDashboard() {
           onChange={(e) => setSelectedDoctorId(e.target.value)}
           required
         >
-          {doctors.length === 0 ? (
+          {doctorOptions.length === 0 ? (
             <MenuItem disabled>No doctors available</MenuItem>
           ) : (
-            doctors.map((doc) => (
+            doctorOptions.map((doc) => (
               <MenuItem key={doc.id} value={doc.id}>
                 {doc.name || 'Unnamed'} ({doc.specialization || 'No specialty'})
               </MenuItem>

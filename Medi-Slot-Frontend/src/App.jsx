@@ -1,6 +1,7 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from './context/AuthContext';
 import Navbar from './components/Navbar';
+import ErrorBoundary from './components/ErrorBoundary';   // <-- new
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -38,16 +39,30 @@ function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <Navbar />
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/login" element={!user ? <Login /> : <Navigate to={user.role === 'PATIENT' ? '/patient' : user.role === 'DOCTOR' ? '/doctor' : '/admin'} />} />
-        <Route path="/register" element={!user ? <Register /> : <Navigate to="/" />} />
-        <Route path="/patient" element={user?.role === 'PATIENT' ? <PatientDashboard /> : <Navigate to="/login" />} />
-        <Route path="/doctor" element={user?.role === 'DOCTOR' ? <DoctorDashboard /> : <Navigate to="/login" />} />
-        <Route path="/admin" element={user?.role === 'ADMIN' ? <AdminDashboard /> : <Navigate to="/login" />} />
-        <Route path="*" element={<NotFound />} />
-      </Routes>
+      <ErrorBoundary>
+        <Navbar />
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route
+            path="/login"
+            element={!user ? <Login /> : <Navigate to={user.role === 'PATIENT' ? '/patient' : user.role === 'DOCTOR' ? '/doctor' : '/admin'} />}
+          />
+          <Route path="/register" element={!user ? <Register /> : <Navigate to="/" />} />
+          <Route
+            path="/patient"
+            element={user?.role === 'PATIENT' ? <PatientDashboard /> : <Navigate to="/login" />}
+          />
+          <Route
+            path="/doctor"
+            element={user?.role === 'DOCTOR' ? <DoctorDashboard /> : <Navigate to="/login" />}
+          />
+          <Route
+            path="/admin"
+            element={user?.role === 'ADMIN' ? <AdminDashboard /> : <Navigate to="/login" />}
+          />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </ErrorBoundary>
     </ThemeProvider>
   );
 }
