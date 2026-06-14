@@ -21,22 +21,11 @@ export default function Register() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-
     if (form.password !== form.confirmPassword) {
       setError('Passwords do not match');
       return;
     }
-
-    // Send only required fields, role hardcoded as PATIENT
-    const payload = {
-      name: form.name,
-      email: form.email,
-      password: form.password,
-      location: form.location,
-      pincode: form.pincode,
-      role: 'PATIENT',
-    };
-
+    const { confirmPassword, ...payload } = { ...form, role: 'PATIENT' };
     try {
       await register(payload);
       navigate('/login');

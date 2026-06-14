@@ -3,8 +3,7 @@ import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
 import {
-  Box, Grid, Card, CardContent, Typography, Button, TextField,
-  Chip, Divider
+  Box, Grid, Card, CardContent, Typography, Button, TextField, Chip
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import EventAvailableIcon from '@mui/icons-material/EventAvailable';
@@ -13,12 +12,12 @@ import EventBusyIcon from '@mui/icons-material/EventBusy';
 export default function DoctorDashboard() {
   const { user } = useAuth();
   const [appointments, setAppointments] = useState([]);
-  const [slots, setSlots] = useState([]);   // <-- doctor's own slots
+  const [slots, setSlots] = useState([]);
   const [slot, setSlot] = useState({ startTime: '', endTime: '' });
 
   useEffect(() => {
     fetchAppointments();
-    fetchMySlots();   // <-- load slots on mount
+    fetchMySlots();
   }, []);
 
   const fetchAppointments = async () => {
@@ -32,7 +31,7 @@ export default function DoctorDashboard() {
 
   const fetchMySlots = async () => {
     try {
-      const res = await api.get('/doctor/slots');   // new endpoint
+      const res = await api.get('/doctor/slots');
       setSlots(res.data);
     } catch (err) {
       toast.error('Failed to load your slots');
@@ -49,7 +48,7 @@ export default function DoctorDashboard() {
       await api.post('/doctor/slots', slot);
       toast.success('Slot added successfully!');
       setSlot({ startTime: '', endTime: '' });
-      fetchMySlots();   // refresh list
+      fetchMySlots();   // refresh slot list
     } catch (err) {
       toast.error(err.response?.data?.message || 'Failed to add slot');
     }
@@ -58,14 +57,14 @@ export default function DoctorDashboard() {
   return (
     <Box sx={{ p: 4 }}>
       <Typography variant="h4" fontWeight="bold" gutterBottom>
-        Dr. {user?.username || 'Doctor'} Dashboard
+        Dr. {user?.role === 'DOCTOR' ? 'Doctor' : ''} Dashboard
       </Typography>
       <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
         Manage your available slots and view appointments.
       </Typography>
 
       <Grid container spacing={4}>
-        {/* Add Slot Form & My Slots (combined) */}
+        {/* Add Slot Form & My Slots */}
         <Grid item xs={12} md={6}>
           <Card sx={{ p: 3, boxShadow: 4, mb: 4 }}>
             <Typography variant="h6" fontWeight="bold" sx={{ mb: 3 }}>

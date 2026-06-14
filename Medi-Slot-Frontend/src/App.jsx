@@ -6,7 +6,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import PatientDashboard from './pages/PatientDashboard';
 import DoctorDashboard from './pages/DoctorDashboard';
-import AdminDashboard from './pages/AdminDashboard';   
+import AdminDashboard from './pages/AdminDashboard';
 import NotFound from './pages/NotFound';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -41,23 +41,11 @@ function App() {
       <Navbar />
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route
-          path="/login"
-          element={!user ? <Login /> : <Navigate to={user.role === 'PATIENT' ? '/patient' : user.role === 'DOCTOR' ? '/doctor' : '/admin'} />}
-        />
+        <Route path="/login" element={!user ? <Login /> : <Navigate to={user.role === 'PATIENT' ? '/patient' : user.role === 'DOCTOR' ? '/doctor' : '/admin'} />} />
         <Route path="/register" element={!user ? <Register /> : <Navigate to="/" />} />
-        <Route
-          path="/patient"
-          element={user?.role === 'PATIENT' ? <PatientDashboard /> : <Navigate to="/login" />}
-        />
-        <Route
-          path="/doctor"
-          element={user?.role === 'DOCTOR' ? <DoctorDashboard /> : <Navigate to="/login" />}
-        />
-        <Route
-          path="/admin"
-          element={user?.role === 'ADMIN' ? <AdminDashboard /> : <Navigate to="/login" />}
-        />
+        <Route path="/patient" element={user?.role === 'PATIENT' ? <PatientDashboard /> : <Navigate to="/login" />} />
+        <Route path="/doctor" element={user?.role === 'DOCTOR' ? <DoctorDashboard /> : <Navigate to="/login" />} />
+        <Route path="/admin" element={user?.role === 'ADMIN' ? <AdminDashboard /> : <Navigate to="/login" />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </ThemeProvider>

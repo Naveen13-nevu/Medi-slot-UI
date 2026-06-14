@@ -27,10 +27,19 @@ export default function AdminDashboard() {
 
   const fetchDoctors = async () => {
     try {
-      const res = await api.get('/doctors');
-      setDoctors(res.data);
+      const res = await api.get('/doctors?size=100');
+      console.log('Doctors API response:', res.data);   // DEBUG
+      const list = res.data.content || res.data;         // support page or array
+      if (Array.isArray(list)) {
+        console.log('Setting doctors list:', list.length, 'items');
+        setDoctors([...list]);   // new array to trigger re-render
+      } else {
+        console.warn('Unexpected doctors format', list);
+        setDoctors([]);
+      }
     } catch (err) {
-      console.error('Could not load doctors', err);
+      console.error('Failed to fetch doctors:', err);
+      toast.error('Could not load doctors');
     }
   };
 
@@ -44,7 +53,7 @@ export default function AdminDashboard() {
     try {
       await api.post('/admin/doctors', doctorForm);
       toast.success('Doctor created');
-      fetchDoctors();
+      fetchDoctors();                     // refresh the list
       setDoctorForm({ email: '', password: '', name: '', specialization: '', experience: '', phone: '' });
     } catch (err) {
       setError(err.response?.data?.message || 'Creation failed');
@@ -80,9 +89,10 @@ export default function AdminDashboard() {
         Admin Dashboard
       </Typography>
       <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
-        Logged in as <strong>{user?.role}</strong>.
+        Logged in as <strong>{user?.role || 'Admin'}</strong>
       </Typography>
 
+      {/* Create Doctor Card */}
       <Card sx={{ p: 4, maxWidth: 500, width: '100%', mb: 4, boxShadow: 4 }}>
         <Typography variant="h6" fontWeight="bold" sx={{ mb: 3 }}>
           Create a New Doctor
@@ -102,10 +112,16 @@ export default function AdminDashboard() {
         </form>
       </Card>
 
+      {/* Add Slot Card */}
       <Card sx={{ p: 4, maxWidth: 500, width: '100%', boxShadow: 4 }}>
-        <Typography variant="h6" fontWeight="bold" sx={{ mb: 3 }}>
-          Add Available Slot for a Doctor
-        </Typography>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+          <Typography variant="h6" fontWeight="bold">
+            Add Available Slot for a Doctor
+          </Typography>
+          <Button size="small" variant="outlined" onClick={fetchDoctors}>
+            Refresh Doctors
+          </Button>
+        </Box>
         <TextField
           select
           label="Select Doctor"
@@ -115,11 +131,15 @@ export default function AdminDashboard() {
           onChange={(e) => setSelectedDoctorId(e.target.value)}
           required
         >
-          {doctors.map((doc) => (
-            <MenuItem key={doc.id} value={doc.id}>
-              {doc.name} ({doc.specialization})
-            </MenuItem>
-          ))}
+          {doctors.length === 0 ? (
+            <MenuItem disabled>No doctors available</MenuItem>
+          ) : (
+            doctors.map((doc) => (
+              <MenuItem key={doc.id} value={doc.id}>
+                {doc.name || 'Unnamed'} ({doc.specialization || 'No specialty'})
+              </MenuItem>
+            ))
+          )}
         </TextField>
         <form onSubmit={addSlotForDoctor}>
           <TextField

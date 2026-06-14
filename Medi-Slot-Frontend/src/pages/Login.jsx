@@ -15,7 +15,9 @@ export default function Login() {
     try {
       await login(form.email, form.password);
       const role = localStorage.getItem('role');
-      navigate(role === 'PATIENT' ? '/patient' : role === 'DOCTOR' ? '/doctor' : '/admin');
+      if (role === 'PATIENT') navigate('/patient');
+      else if (role === 'DOCTOR') navigate('/doctor');
+      else navigate('/admin');
     } catch (err) {
       setError(err.response?.data?.message || 'Invalid email or password');
     }

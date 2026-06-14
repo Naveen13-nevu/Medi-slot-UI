@@ -35,7 +35,7 @@ export default function Navbar() {
           <>
             <Button
               component={Link}
-              to={user.role === 'PATIENT' ? '/patient' : '/doctor'}
+              to={user.role === 'PATIENT' ? '/patient' : user.role === 'DOCTOR' ? '/doctor' : '/admin'}
               variant={location.pathname === `/${user.role.toLowerCase()}` ? 'contained' : 'text'}
               color="primary"
               sx={{ mr: 2 }}
