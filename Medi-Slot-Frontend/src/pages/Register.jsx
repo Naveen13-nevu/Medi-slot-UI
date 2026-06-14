@@ -21,11 +21,20 @@ export default function Register() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+
     if (form.password !== form.confirmPassword) {
       setError('Passwords do not match');
       return;
     }
-    const { confirmPassword, ...payload } = { ...form, role: 'PATIENT' };
+
+    const payload = {
+      name: form.name,
+      email: form.email,
+      password: form.password,
+      location: form.location || '',
+      pincode: form.pincode || '',
+    };
+
     try {
       await register(payload);
       navigate('/login');

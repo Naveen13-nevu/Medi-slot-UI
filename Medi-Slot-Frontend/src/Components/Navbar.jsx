@@ -19,6 +19,15 @@ export default function Navbar() {
     navigate('/login');
   };
 
+  // Safely compute the dashboard path – no crash even if user is null
+  let dashboardPath = '/';
+  if (user && user.role) {
+    const role = user.role.toUpperCase();
+    if (role === 'PATIENT') dashboardPath = '/patient';
+    else if (role === 'DOCTOR') dashboardPath = '/doctor';
+    else if (role === 'ADMIN') dashboardPath = '/admin';
+  }
+
   return (
     <AppBar position="sticky" sx={{ backgroundColor: 'white', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
       <Toolbar>
@@ -35,8 +44,8 @@ export default function Navbar() {
           <>
             <Button
               component={Link}
-              to={user.role === 'PATIENT' ? '/patient' : user.role === 'DOCTOR' ? '/doctor' : '/admin'}
-              variant={location.pathname === `/${user.role.toLowerCase()}` ? 'contained' : 'text'}
+              to={dashboardPath}
+              variant={location.pathname === dashboardPath ? 'contained' : 'text'}
               color="primary"
               sx={{ mr: 2 }}
             >

@@ -12,7 +12,6 @@ export default class ErrorBoundary extends Component {
   }
 
   componentDidCatch(error, info) {
-    // This will appear in the browser console so you can debug
     console.error('ErrorBoundary caught:', error, info);
   }
 
